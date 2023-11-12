@@ -1,0 +1,103 @@
+#include <iostream>
+#include <cstring>
+using namespace std;
+
+class Course {
+private:
+    char* courseName;
+    char** students;
+    int numStudents;
+
+public:
+    // Constructor
+    Course(const char* name, const char** students, int numStudents) : numStudents(numStudents) {
+        courseName = strdup(name);
+
+        this->students = new char*[numStudents];
+        for (int i = 0; i < numStudents; ++i) {
+            this->students[i] = strdup(students[i]);
+        }
+    }
+
+    // Deep Copy Constructor
+    Course(const Course& other) : numStudents(other.numStudents) {
+        courseName = strdup(other.courseName);
+
+        students = new char*[numStudents];
+        for (int i = 0; i < numStudents; ++i) {
+            students[i] = strdup(other.students[i]);
+        }
+    }
+
+    // Destructor
+    ~Course() {
+        delete[] courseName;
+
+        for (int i = 0; i < numStudents; ++i) {
+            delete[] students[i];
+        }
+        delete[] students;
+    }
+
+    void dropStudent(const char* student) {
+        int i = 0;
+        while (i < numStudents && strcmp(students[i], student) != 0) {
+            ++i;
+        }
+
+        if (i < numStudents) {
+            delete[] students[i];
+            --numStudents;
+
+            if (i < numStudents) {
+                students[i] = students[numStudents];
+            }
+        }
+    }
+
+    void addStudent(const char* student) {
+        char** newStudents = new char*[numStudents + 1];
+        memcpy(newStudents, students, numStudents * sizeof(char*));
+
+        newStudents[numStudents] = strdup(student);
+
+        delete[] students;
+        students = newStudents;
+        ++numStudents;
+    }
+
+    
+    const char** getStudents() const {
+        return const_cast<const char**>(students);
+    }
+
+    const char* getCourseName() const {
+        return courseName;
+    }
+};
+
+int main() {
+    const char* students[] = {"laeeqa", "manan", "supugmy"};
+
+    Course course1("linear Algebra", students, 3);
+
+    Course course2 = course1;
+
+    cout << "Students in course1: ";
+    cout << course1.getStudents()[0] << " " << course1.getStudents()[1] << " " << course1.getStudents()[2] << std::endl;
+
+    course2.dropStudent("manan");
+
+    
+    cout << "Students in course2 after dropping manan: ";
+    cout << course2.getStudents()[0] << " " << course2.getStudents()[1] << std::endl;
+
+    return 0;
+}
+
+
+
+
+
+
+
